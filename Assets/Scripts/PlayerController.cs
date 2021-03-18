@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     public float gravityModifier = 2f;
     public float jumpForce = 10f;
+    public bool gameOver = false;
 
     private Rigidbody rb;
     private bool onGround = true;
@@ -20,7 +21,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && onGround)
+        if (!gameOver && Input.GetKeyDown(KeyCode.Space) && onGround)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             onGround = false;
@@ -29,6 +30,16 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        onGround = true;
+        switch(collision.gameObject.tag)
+        {
+            case "Ground":
+                onGround = true;
+                break;
+            case "Obstacle":
+                Debug.Log("Game Over!");
+                gameOver = true;
+                break;
+        }
+        
     }
 }
