@@ -8,16 +8,24 @@ public class PlayerController : MonoBehaviour
     public float jumpForce = 10f;
     public float flipTorque = 20f;
     public bool gameOver = false;
+    public ParticleSystem gameOverParticleSystem;
+    public ParticleSystem dirtParticleSystem;
+    public AudioClip jumpSFX;
+    public float jumpSFXVol = 1.0f;
+    public AudioClip crashSFX;
+    public float crashSFXVol = 1.0f;
 
     private Rigidbody rb;
     private bool onGround = true;
     private Animator anim;
+    private AudioSource audio;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
+        audio = GetComponent<AudioSource>();
 
         Physics.gravity *= gravityModifier;
     }
@@ -31,6 +39,8 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             onGround = false;
             anim.SetTrigger("Jump_trig");
+            dirtParticleSystem.Stop();
+            audio.PlayOneShot(jumpSFX, jumpSFXVol);
         }
     }
 
@@ -40,8 +50,11 @@ public class PlayerController : MonoBehaviour
         {
             // Landed after jump
             case "Ground":
-                rb.angularVelocity = Vector3.zero;
                 onGround = true;
+                if (!gameOver)
+                {
+                    dirtParticleSystem.Play();
+                }
                 break;
 
             // Crashed into obstacle
@@ -50,6 +63,9 @@ public class PlayerController : MonoBehaviour
                 gameOver = true;
                 anim.SetBool("Death_b", true);
                 anim.SetInteger("DeathType_int", 2);
+                dirtParticleSystem.Stop();
+                gameOverParticleSystem.Play();
+                audio.PlayOneShot(crashSFX, crashSFXVol);
                 break;
         }
         
